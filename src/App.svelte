@@ -18,6 +18,7 @@ MARC2	678
 
 $: for(let file of files)
 {
+	file.out = `${file.name.replace(/\.[^/.]+$/, "")}.xlsx`;
 	results[file.name] = {};
 	results[file.name].message = `Parsing <code>${file.name}</code>...`;
 
@@ -72,7 +73,7 @@ function writeXLSX(file, wb)
 function downloadXLSX(file)
 {
 	let a = document.createElement("a");
-	a.download = `${file.name}.xlsx`;
+	a.download = file.out;
 	a.href = results[file.name].url;
 	document.body.appendChild(a);
 	a.click();
@@ -128,7 +129,7 @@ function s2ab(s) {
 					<button 
 						type="button" class="btn btn-link p-0" style="vertical-align: baseline"
 						on:click={() => files = [
-							{ name: "genes.csv", data: sampleFile },
+							{ name: "genes.csv", out: "genes.xlsx", data: sampleFile },
 						]}
 					>
 						<strong>a sample CSV file</strong>
@@ -152,7 +153,7 @@ function s2ab(s) {
 						</h5>
 						<div class="card-body">
 							{#if results[file.name].ready}
-								<button type="button" class="btn btn-primary" on:click={() => downloadXLSX(file)}>Download</button>
+								<button type="button" class="btn btn-primary" on:click={() => downloadXLSX(file)}>Download {file.out}</button>
 							{:else}
 								<p class="card-text">{@html results[file.name].message}</p>
 							{/if}
