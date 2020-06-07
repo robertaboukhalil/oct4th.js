@@ -1,6 +1,15 @@
 <script>
 let files = [];
 let results = {};
+let sampleFile = `
+GeneName	SomeValue
+TP53	123
+OCT4	234
+DEC1	345
+MARCH1	456
+MARCH2	567
+MARC2	678
+`;
 
 
 // -----------------------------------------------------------------------------
@@ -13,7 +22,8 @@ $: for(let file of files)
 	results[file.name].message = `Parsing <code>${file.name}</code>...`;
 
 	// Parse file in a WebWorker
-	Papa.parse(file, {
+	let data = file instanceof File ? file : file.data;
+	Papa.parse(data, {
 		worker: true,
 		fastMode: false,  // quotes in CSV files properly parsed
 		dynamicTyping: true,
@@ -44,7 +54,7 @@ function generateXLSX(file, data)
 	let ws = XLSX.utils.aoa_to_sheet(data);
 	XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
-	results[file.name].message = "Writing to <code>.xlsx</code>...";
+	results[file.name].message = "Writing to <code>.xlsx</code>... This may take a few minutes...";
 	setTimeout(() => writeXLSX(file, wb), 100);
 }
 
@@ -112,7 +122,20 @@ function s2ab(s) {
 					<input type="file" class="custom-file-input" id="customFile" bind:files={files} multiple>
 					<label class="custom-file-label" for="customFile">Click here to select files</label>
 				</div>
-			
+
+				<p class="text-center mt-2">
+					or use
+					<button 
+						type="button" class="btn btn-link p-0" style="vertical-align: baseline"
+						on:click={() => files = [
+							{ name: "genes.csv", data: sampleFile },
+						]}
+					>
+						<strong>a sample CSV file</strong>
+					</button>
+				</p>
+
+
 				<p>🔒 Your files never leave your browser.</p>
 			</div>
 
