@@ -26,8 +26,8 @@ $: for(let file of files)
 				return;
 			}
 
-			results[file.name].message = `Converting to <code>.xlsx</code>...`;
-			generateXLSX(file, d.data);
+			results[file.name].message = "Converting to <code>.xlsx</code>...";
+			setTimeout(() => generateXLSX(file, d.data), 100);
 		}
 	});
 }
@@ -37,19 +37,43 @@ $: for(let file of files)
 // Utility functions
 // -----------------------------------------------------------------------------
 
-async function generateXLSX(file, data)
+function generateXLSX(file, data)
 {
+	// Create XLSX file
 	let wb = XLSX.utils.book_new();
 	let ws = XLSX.utils.aoa_to_sheet(data);
 	XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-	results[file.name].wb = wb;
+
+	results[file.name].message = "Writing to <code>.xlsx</code>...";
+	setTimeout(() => writeXLSX(file, wb), 100);
+}
+
+function writeXLSX(file, wb)
+{
+	// Create Blob from XLSX output, then create URL from Blob
+	let out = XLSX.write(wb, { compression: true, bookType: "xlsx", type: "binary" });
+	let blob = new Blob([ s2ab(out)], { type: "application/octet-stream" });
+	let url = URL.createObjectURL(blob);
+	results[file.name].url = url;
 	results[file.name].ready = true;
 }
 
+// Source: https://github.com/SheetJS/js-xlsx/blob/master/README.md
 function downloadXLSX(file)
 {
-	let wb = results[file.name].wb;
-	XLSX.writeFile(wb, file.name + ".xlsx", { compression: true });
+	let a = document.createElement("a");
+	a.download = `${file.name}.xlsx`;
+	a.href = results[file.name].url;
+	document.body.appendChild(a);
+	a.click();
+}
+
+// Source: https://github.com/SheetJS/js-xlsx/blob/master/README.md
+function s2ab(s) {
+	var buf = new ArrayBuffer(s.length);
+	var view = new Uint8Array(buf);
+	for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+	return buf;
 }
 
 
@@ -105,9 +129,9 @@ function downloadXLSX(file)
 						</h5>
 						<div class="card-body">
 							{#if results[file.name].ready}
-							<button type="button" class="btn btn-primary" on:click={() => downloadXLSX(file)}>Download</button>
+								<button type="button" class="btn btn-primary" on:click={() => downloadXLSX(file)}>Download</button>
 							{:else}
-							<p class="card-text">{@html results[file.name].message}</p>
+								<p class="card-text">{@html results[file.name].message}</p>
 							{/if}
 						</div>
 					</div>
