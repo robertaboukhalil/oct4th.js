@@ -117,7 +117,7 @@ function s2ab(s) {
 			<p class="lead"></p>
 			<p>
 				Importing CSV/TSV files into Excel can mangle gene names, e.g. the gene <code>OCT4</code> becomes October 4th, while <code>DEC1</code> becomes December 1st.
-				Oct4th helps you avoid this issue by not auto-converting anything to dates.
+				Oct4th avoids this issue by helpfully not converting anything to dates.
 			</p>
 			<a href="https://medium.com/@robaboukhalil/how-to-fix-excels-gene-to-date-conversion-5c98d0072450" class="btn btn-sm btn-secondary" target="_blank">Why does this happen?</a>
 			<a href="https://pypi.org/project/oct4th/" class="btn btn-sm btn-secondary" target="_blank">Get the Python CLI</a>
