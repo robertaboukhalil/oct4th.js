@@ -99,26 +99,33 @@ function s2ab(s) {
 		<ul class="navbar-nav mr-auto"></ul>
 		<ul class="navbar-nav">
 			<li class="nav-item active">
-				<a class="nav-link" href="https://github.com/robertaboukhalil/oct4th">Code</a>
+				<a class="nav-link" href="https://pypi.org/project/oct4th/" target="_blank">CLI Tool</a>
+			</li>
+			<li class="nav-item active">
+				<a class="nav-link" href="https://github.com/robertaboukhalil/oct4th.js" target="_blank">Code</a>
 			</li>
 		</ul>
 	</div>
 </nav>
 
 <main role="main">
-	<div class="jumbotron mt-2 pb-1">
+	<div class="jumbotron mt-4 pb-4">
 		<div class="container">
-			<p class="lead">Convert text files to Excel spreadsheets the safe way</p>
+			<h4 class="display-5">🧬&nbsp; Convert data files to Excel, without gene mangling</h4>
+			<p class="lead"></p>
 			<p>
-				Importing CSV/TSV files into Excel can lead to mangled gene names, e.g. the gene <code>OCT4</code> becomes October 4th, while <code>DEC1</code> becomes December 1st.
+				Importing CSV/TSV files into Excel can mangle gene names, e.g. the gene <code>OCT4</code> becomes October 4th, while <code>DEC1</code> becomes December 1st.
+				Oct4th helps you avoid this issue by not auto-converting anything to dates.
 			</p>
+			<a href="https://medium.com/@robaboukhalil/how-to-fix-excels-gene-to-date-conversion-5c98d0072450" class="btn btn-sm btn-secondary" target="_blank">Why does this happen?</a>
+			<a href="https://pypi.org/project/oct4th/" class="btn btn-sm btn-secondary" target="_blank">Get the Python CLI</a>
 		</div>
 	</div>
 
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4">
-				<h4 class="mb-4">Choose Files</h4>
+				<h4 class="mb-4">Choose files to convert:</h4>
 				<div class="custom-file mb-2">
 					<input type="file" class="custom-file-input" id="customFile" bind:files={files} multiple>
 					<label class="custom-file-label" for="customFile">Click here to select files</label>
@@ -136,8 +143,9 @@ function s2ab(s) {
 					</button>
 				</p>
 
-
+				<p>&nbsp;</p>
 				<p>🔒 Your files never leave your browser.</p>
+				<p>📂 For large files, use the <a href="https://pypi.org/project/oct4th/" target="_blank"><kbd>oct4th</kbd> CLI</a>.</p>
 			</div>
 
 			<div class="col-md-8">
