@@ -4,22 +4,61 @@
 // Globals
 // -----------------------------------------------------------------------------
 
-let busy = false;
 let files = [];
+let results = {};
 
 
 // -----------------------------------------------------------------------------
 // Reactive statements
 // -----------------------------------------------------------------------------
 
+$: for(let file of files)
+{
+	results[file.name] = {};
+	results[file.name].message = `Parsing <code>${file.name}</code>...`;
+
+	// Parse file in a WebWorker
+	Papa.parse(file, {
+		worker: true,
+		fastMode: false,  // quotes in CSV files properly parsed
+		dynamicTyping: true,
+		skipEmptyLines: true,
+		complete: d => {
+			// TODO: check for errors
+			// if((data.errors && data.errors.length > 0) || data.length == 0) {
+			//     dialog.showErrorBox("Skipped File", "Skipping file " + path.basename(f) + " - invalid format");
+			//     console.log("WARNING: Skipping file " + path.basename(f) + " - invalid format");
+			//     convertFile(allFiles, i+1);
+			//     return;
+			// }
+
+			results[file.name].message = `Converting to <code>.xlsx</code>...`;
+			generateXLSX(file, d.data);
+		}
+	});
+}
+
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 
-function run()
+function generateXLSX(file, data)
 {
+	let ws_name = "SheetJS";
+	let wb = XLSX.utils.book_new();
+	let ws = XLSX.utils.aoa_to_sheet(data);
+	XLSX.utils.book_append_sheet(wb, ws, ws_name);
 
+	results[file.name].message = "Done";
+	results[file.name].wb = wb;
+	results[file.name].ready = true;
+}
+
+function downloadXLSX(file)
+{
+	let wb = results[file.name].wb;
+	XLSX.writeFile(wb, file.name + ".xlsx", { compression: true });
 }
 
 
@@ -54,39 +93,28 @@ function run()
 		<div class="row">
 			<div class="col-md-4">
 				<h4 class="mb-4">Choose Files</h4>
-
-				<p>Choose comma-separated or tab-separated text files from your computer</p>
-
 				<div class="custom-file mb-2">
 					<input type="file" class="custom-file-input" id="customFile" bind:files={files} multiple>
 					<label class="custom-file-label" for="customFile">Click here to select files</label>
 				</div>
-
-				<hr />
-
-				<button type="button" class="btn btn-primary btn-lg" on:click={run} disabled={busy}>
-					Convert to XLSX
-					{#if busy}
-						<span class="spinner-grow spinner-grow-sm mb-1" role="status" aria-hidden="true"></span>
-					{/if}
-				</button>
-
-				<br /><br />
+			
 				<p>🔒 Your files never leave your browser.</p>
 			</div>
 
 			<div class="col-md-8">
 				<h4 class="mb-4">Output</h4>
 
-				{#each files as file}
+				{#each files as file, fileID}
 					<div class="card">
-						<div class="card-header">
+						<h5 class="card-header">
 							{file.name}
-						</div>
+							<span class="spinner-grow spinner-grow-sm text-primary mb-1" role="status" aria-hidden="true"></span>
+						</h5>
 						<div class="card-body">
-							<h5 class="card-title">Special title treatment</h5>
-							<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-							<a href="#" class="btn btn-primary">Go somewhere</a>
+							<p class="card-text">{results[file.name].message}</p>
+							{#if results[file.name].ready}
+							<button type="button" on:click={() => downloadXLSX(file)}>Download</button>
+							{/if}
 						</div>
 					</div>
 				{/each}
