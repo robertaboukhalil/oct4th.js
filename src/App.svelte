@@ -1,9 +1,4 @@
 <script>
-
-// -----------------------------------------------------------------------------
-// Globals
-// -----------------------------------------------------------------------------
-
 let files = [];
 let results = {};
 
@@ -24,13 +19,12 @@ $: for(let file of files)
 		dynamicTyping: true,
 		skipEmptyLines: true,
 		complete: d => {
-			// TODO: check for errors
-			// if((data.errors && data.errors.length > 0) || data.length == 0) {
-			//     dialog.showErrorBox("Skipped File", "Skipping file " + path.basename(f) + " - invalid format");
-			//     console.log("WARNING: Skipping file " + path.basename(f) + " - invalid format");
-			//     convertFile(allFiles, i+1);
-			//     return;
-			// }
+			// Check for errors
+			if((d.errors && d.errors.length > 0) || d.length == 0) {
+				results[file.name].error = true;
+				results[file.name].message = "Could not parse this file. Make sure it's a comma- or tab-separated file.";
+				return;
+			}
 
 			results[file.name].message = `Converting to <code>.xlsx</code>...`;
 			generateXLSX(file, d.data);
@@ -40,17 +34,14 @@ $: for(let file of files)
 
 
 // -----------------------------------------------------------------------------
-// 
+// Utility functions
 // -----------------------------------------------------------------------------
 
-function generateXLSX(file, data)
+async function generateXLSX(file, data)
 {
-	let ws_name = "SheetJS";
 	let wb = XLSX.utils.book_new();
 	let ws = XLSX.utils.aoa_to_sheet(data);
-	XLSX.utils.book_append_sheet(wb, ws, ws_name);
-
-	results[file.name].message = "Done";
+	XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 	results[file.name].wb = wb;
 	results[file.name].ready = true;
 }
@@ -108,12 +99,15 @@ function downloadXLSX(file)
 					<div class="card">
 						<h5 class="card-header">
 							{file.name}
-							<span class="spinner-grow spinner-grow-sm text-primary mb-1" role="status" aria-hidden="true"></span>
+							{#if !results[file.name].ready && !results[file.name].error}
+								<span class="spinner-grow spinner-grow-sm text-primary mb-1" role="status" aria-hidden="true"></span>
+							{/if}
 						</h5>
 						<div class="card-body">
-							<p class="card-text">{results[file.name].message}</p>
 							{#if results[file.name].ready}
-							<button type="button" on:click={() => downloadXLSX(file)}>Download</button>
+							<button type="button" class="btn btn-primary" on:click={() => downloadXLSX(file)}>Download</button>
+							{:else}
+							<p class="card-text">{@html results[file.name].message}</p>
 							{/if}
 						</div>
 					</div>
